@@ -1,14 +1,16 @@
 from sys import argv, exit
 
-from PyQt6.QtGui import QPixmap, QImage
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap, QImage, QKeyEvent
 from PyQt6.QtWidgets import QApplication, QMainWindow
 
+from API_KEYS import *
 from Work.UI.Window import Ui_MainWindow
 from utils import *
 
-STATIC_MAPS_API_KEY = "YOUR_API_KEY"
-GEOCODE_API_KEY = "YOUR_API_KEY"
-SEARCH_MAPS_API_KEY = "YOUR_API_KEY"
+STATIC_MAPS_API_KEY = STATIC_MAPS_API_KEY
+GEOCODE_API_KEY = GEOCODE_API_KEY
+SEARCH_MAPS_API_KEY = SEARCH_MAPS_API_KEY
 
 
 class SearchMapApp(QMainWindow, Ui_MainWindow):
@@ -36,6 +38,15 @@ class SearchMapApp(QMainWindow, Ui_MainWindow):
         }
         data = get_image_from_coord(**params)
         self.label.setPixmap(QPixmap.fromImage(QImage.fromData(data)))
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        if event.key() == Qt.Key.Key_PageUp:
+            self.zoom = min(21, self.zoom + 1)
+        elif event.key() == Qt.Key.Key_PageDown:
+            self.zoom = max(0, self.zoom - 1)
+        else:
+            return
+        self.set_image()
 
 
 if __name__ == '__main__':
