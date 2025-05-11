@@ -109,7 +109,7 @@ class SearchMapApp(QMainWindow, Ui_MainWindow):
             self.zoom = min(21, self.zoom + 1)
         elif event.key() == Qt.Key.Key_PageDown:
             self.zoom = max(0, self.zoom - 1)
-        elif event.key() == Qt.Key.Key_Enter:
+        elif event.key() == Qt.Key.Key_Return:
             self.search()
         else:
             return
