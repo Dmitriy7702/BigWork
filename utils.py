@@ -41,6 +41,16 @@ def get_geocode_data(**params):
     return response.json()
 
 
+def get_address_and_postal_code_from_geocode_obj(obj: dict) -> tuple[str, str]:
+    try:
+        addr = obj['metaDataProperty']['GeocoderMetaData']['Address']
+        address = addr.get('formatted', str())
+        postal_code = addr.get('postal_code', str())
+        return address, postal_code
+    except KeyError:
+        return '', ''
+
+
 def get_search_api_data(**params) -> dict:
     server = 'https://search-maps.yandex.ru/v1'
     session = Session()

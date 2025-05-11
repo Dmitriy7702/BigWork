@@ -3,7 +3,7 @@ from typing import Optional
 
 from PyQt6.QtCore import pyqtSignal, pyqtBoundSignal, Qt
 from PyQt6.QtGui import QPixmap, QImage, QKeyEvent
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit
+from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton
 
 from API_KEYS import *
 from Work.UI.Window import Ui_MainWindow
@@ -19,21 +19,19 @@ class SearchMapApp(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.setFixedSize(650, 450)
+        self.setFixedSize(700, 750)
         self.button = QPushButton('Светлая/Тёмная', self)
-        self.button.move(10, 410)
+        self.button.move(580, 70)
+        self.add_post = QPushButton('Добавить/убрать индекс', self)
+        self.add_post.adjustSize()
+        self.add_post.move(20, 580)
+        self.need_postal: bool = False
+        self.text: list[str, str] = ['', '']
+        bound: pyqtSignal | pyqtBoundSignal = self.add_post.clicked
+        bound.connect(lambda: setattr(self, 'need_postal', not self.need_postal) or (self.address_error.setText(
+            ', '.join(self.text) if self.need_postal else self.text[0])))
 
-        self.search_area = QLineEdit(self)
-        self.search_area.resize(540, 30)
-        self.search_area.move(10, 10)
-
-        self.reset_button = QPushButton('Сброс', self)
-        self.reset_button.move(560, 40)
-
-        self.search_btn = QPushButton("Искать", self)
-        self.search_btn.move(560, 10)
-
-        bound: pyqtSignal | pyqtBoundSignal = self.reset_button.clicked
+        bound: pyqtSignal | pyqtBoundSignal = self.reset_btn.clicked
         bound.connect(self.reset)
 
         bound: pyqtSignal | pyqtBoundSignal = self.search_btn.clicked
@@ -51,6 +49,8 @@ class SearchMapApp(QMainWindow, Ui_MainWindow):
 
     def reset(self):
         self.marked_point = list()
+        self.address_error.clear()
+        self.search_area.clear()
         self.set_image()
 
     def search(self):
@@ -62,7 +62,11 @@ class SearchMapApp(QMainWindow, Ui_MainWindow):
             'geocode': request,
             'format': 'json'
         }
-        coords = get_coord_from_object(get_object(get_geocode_data(**params)))
+        obj = get_object(get_geocode_data(**params))
+        coords = get_coord_from_object(obj)
+        locality = get_address_and_postal_code_from_geocode_obj(obj)
+        address, postal_code = self.text = locality
+        self.address_error.setText(address + f', {postal_code}' if self.need_postal else address)
         self.current_pos = list(coords)
         self.marked_point = coords
         self.search_area.clearFocus()
