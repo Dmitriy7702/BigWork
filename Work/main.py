@@ -22,14 +22,23 @@ class SearchMapApp(QMainWindow, Ui_MainWindow):
         self.setFixedSize(650, 450)
         self.button = QPushButton('Светлая/Тёмная', self)
         self.button.move(10, 410)
+
         self.search_area = QLineEdit(self)
         self.search_area.resize(540, 30)
         self.search_area.move(10, 10)
 
-        self.search_btn = QPushButton("Найти", self)
+        self.reset_button = QPushButton('Сброс', self)
+        self.reset_button.move(560, 40)
+
+        self.search_btn = QPushButton("Искать", self)
         self.search_btn.move(560, 10)
+
+        bound: pyqtSignal | pyqtBoundSignal = self.reset_button.clicked
+        bound.connect(self.reset)
+
         bound: pyqtSignal | pyqtBoundSignal = self.search_btn.clicked
         bound.connect(self.search)
+
         bound: pyqtSignal | pyqtBoundSignal = self.button.clicked
         bound.connect(self.set_theme)
 
@@ -38,6 +47,10 @@ class SearchMapApp(QMainWindow, Ui_MainWindow):
         self.zoom = 17
         self.current_pos = None
         self.set_default_position()
+        self.set_image()
+
+    def reset(self):
+        self.marked_point = list()
         self.set_image()
 
     def search(self):
@@ -96,6 +109,8 @@ class SearchMapApp(QMainWindow, Ui_MainWindow):
             self.zoom = min(21, self.zoom + 1)
         elif event.key() == Qt.Key.Key_PageDown:
             self.zoom = max(0, self.zoom - 1)
+        elif event.key() == Qt.Key.Key_Enter:
+            self.search()
         else:
             return
         self.set_image()
